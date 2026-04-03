@@ -6,45 +6,78 @@
     <title>房地產財務助手 - 17年專家陳佑浚監製</title>
     <style>
         :root { --primary: #2c3e50; --accent: #d35400; --bg: #f4f7f6; --green: #27ae60; --light-blue: #eef2f7; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; }
-        .wrapper { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        
+        /* 動態背景容器 */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1; /* 確保在最底層 */
+            background-color: #f4f7f6; /* 備用背景色 */
+        }
+
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; }
+        .wrapper { max-width: 800px; margin: 20px auto; padding: 0 15px; position: relative; z-index: 1; }
         
         /* 分頁標籤 */
-        .tabs { display: flex; background: #ddd; border-radius: 12px 12px 0 0; overflow: hidden; }
-        .tab-btn { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: #eee; color: #666; }
-        .tab-btn.active { background: white; color: var(--accent); border-top: 4px solid var(--accent); }
+        .tabs { display: flex; background: rgba(221, 221, 221, 0.8); border-radius: 12px 12px 0 0; overflow: hidden; backdrop-filter: blur(5px); }
+        .tab-btn { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: rgba(238, 238, 238, 0.5); color: #666; }
+        .tab-btn.active { background: rgba(255, 255, 255, 0.9); color: var(--accent); border-top: 4px solid var(--accent); }
         
-        .card { background: white; padding: 25px; border-radius: 0 0 15px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); display: none; }
+        /* 卡片改為半透明毛玻璃效果 */
+        .card { 
+            background: rgba(255, 255, 255, 0.85); 
+            padding: 25px; 
+            border-radius: 0 0 15px 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            display: none; 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
         .card.active { display: block; }
 
-        h2 { color: var(--primary); font-size: 20px; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { color: var(--primary); font-size: 20px; margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; }
         h3 { font-size: 15px; color: var(--accent); margin: 20px 0 10px 0; display: flex; align-items: center; }
         h3::before { content: ""; display: inline-block; width: 4px; height: 15px; background: var(--accent); margin-right: 8px; }
         
         .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; }
         .form-group { flex: 1; min-width: 240px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: rgba(255, 255, 255, 0.9); }
         
-        /* 土地漲價總數額問號說明 */
         .tooltip { display: inline-block; position: relative; margin-left: 5px; cursor: help; background: #999; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; font-size: 12px; line-height: 18px; }
         .tooltip:hover::after { content: "土地漲價總數額 = \A 當期公告土地現值 \A - 前次移轉現值 \A x 物價指數修正 \A (請直接查閱土增稅單最準確)"; position: absolute; left: 25px; top: 0; background: #333; color: white; padding: 10px; border-radius: 5px; width: 220px; white-space: pre-wrap; z-index: 10; font-weight: normal; font-size: 13px; text-align: left; }
 
-        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        button:hover { background: var(--accent); }
+        button { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button:hover { background: var(--accent); transform: translateY(-2px); }
 
-        .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: var(--light-blue); border: 1px solid #cbd5e0; }
+        .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: rgba(238, 242, 247, 0.9); border: 1px solid #cbd5e0; }
         .res-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
         .res-highlight { font-size: 28px; color: #e74c3c; font-weight: bold; text-align: center; margin-top: 15px; }
 
-        /* 形象看板 */
-        .agent-banner { background: white; margin-top: 30px; padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 20px; border: 1px solid #ddd; }
-        .agent-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        /* 形象看板也加入毛玻璃感 */
+        .agent-banner { 
+            background: rgba(255, 255, 255, 0.8); 
+            margin-top: 30px; 
+            padding: 20px; 
+            border-radius: 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            border: 1px solid rgba(255,255,255,0.4); 
+            backdrop-filter: blur(10px);
+        }
+        .agent-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .agent-info b { font-size: 18px; color: var(--primary); }
-        .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; }
+        .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: 0.3s; }
+        .btn-contact:hover { background: #009800; transform: scale(1.05); }
     </style>
 </head>
 <body>
+
+<div id="particles-js"></div>
 
 <div class="wrapper">
     <div class="tabs">
@@ -134,7 +167,28 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
 <script>
+    /* 初始化背景特效 */
+    particlesJS("particles-js", {
+        "particles": {
+            "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#2c3e50" },
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.2 },
+            "size": { "value": 3 },
+            "line_linked": { "enable": true, "distance": 150, "color": "#2c3e50", "opacity": 0.2, "width": 1 },
+            "move": { "enable": true, "speed": 1.5, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+            "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.5 } } }
+        },
+        "retina_detect": true
+    });
+
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -149,7 +203,6 @@
         return 0.15;
     }
 
-    // 模式 1 計算
     function calcTaxMode() {
         const buy = parseFloat(document.getElementById('t1-buyPrice').value) || 0;
         const buyAg = parseFloat(document.getElementById('t1-buyAgency').value) || 0;
@@ -174,7 +227,6 @@
         document.getElementById('res1').style.display = 'block';
     }
 
-    // 模式 2 倒推
     function calcPriceMode() {
         const buy = parseFloat(document.getElementById('t2-buyPrice').value) || 0;
         const buyOther = parseFloat(document.getElementById('t2-buyOther').value) || 0;
@@ -186,7 +238,6 @@
         const rate = getRate(years);
 
         const fixedCost = buy + buyOther + reno;
-        // 迴圈逼近計算建議成交價
         let sell = buy + targetProfit + 10; 
         let tax = 0;
         let agencyFee = 0;

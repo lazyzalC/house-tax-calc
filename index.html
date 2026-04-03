@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房地合一稅 2.0 即時試算工具 - 您的房產稅務專家</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍色，顯專業 */
+            --accent-color: #d35400; /* 質感橘，顯活力 */
+            --bg-color: #f0f3f5;
+            --text-color: #333;
+        }
+        body { font-family: "Microsoft JhengHei", "Apple LiGothic Medium", sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; padding-bottom: 100px; /* 為底部名片留緩衝 */ }
+        
+        /* 整體容器 */
+        .main-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        /* 計算器主體 */
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        h2 { text-align: center; color: var(--primary-color); border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 15px; }
+        input[type="number"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="number"]:focus { border-color: var(--accent-color); outline: none; box-shadow: 0 0 5px rgba(211, 84, 0, 0.3); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 10px; background: #fff8f0; padding: 12px; border-radius: 8px; border: 1px solid #ffe0b2; }
+        .checkbox-group label { margin-bottom: 0; color: #e67e22; }
+        
+        button { width: 100%; padding: 15px; background-color: var(--accent-color); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; letter-spacing: 2px; }
+        button:hover { background-color: #a04000; transform: translateY(-2px); }
+        
+        /* 計算結果 */
+        #result { margin-top: 25px; padding: 20px; border-radius: 8px; display: none; background-color: white; border: 2px solid #27ae60; animation: slideIn 0.5s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 8px; font-size: 15px; }
+        .total-tax { font-size: 28px; color: #e74c3c; font-weight: bold; text-align: center; margin-top: 20px; background: #fdf2f2; padding: 10px; border-radius: 8px; }
+        .disclaimer { font-size: 12px; color: #7f8c8d; margin-top: 15px; text-align: center; line-height: 1.6; }
+
+        /* ========= 形象廣告區塊 ========= */
+        
+        /* 1. 頁尾專家簡介 */
+        .agent-profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 25px; border-left: 5px solid var(--primary-color); }
+        .agent-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .agent-info h3 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 22px; }
+        .agent-tag { background: var(--accent-color); color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; vertical-align: middle; margin-left: 10px; }
+        .agent-specialty { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.6; }
+        .contact-btns { display: flex; gap: 10px; }
+        .btn-contact { padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; text-align: center;}
+        .btn-line { background-color: #00b900; color: white; }
+        .btn-line:hover { background-color: #009900; }
+        .btn-phone { background-color: #3498db; color: white; }
+        .btn-phone:hover { background-color: #2980b9; }
+
+        /* 2. 手機版底部浮動名片 (只在手機顯示) */
+        .floating-contact { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.95); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 10px 15px; box-sizing: border-box; z-index: 1000; justify-content: space-between; align-items: center; backdrop-filter: blur(5px); }
+        .floating-agent { display: flex; align-items: center; gap: 10px; }
+        .floating-photo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .floating-name { font-weight: bold; color: var(--primary-color); font-size: 16px; }
+        .floating-title { font-size: 12px; color: #666; }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .main-wrapper { padding: 10px; }
+            .container { padding: 20px; }
+            .agent-profile-card { flex-direction: column; text-align: center; padding: 20px; }
+            .agent-photo { width: 100px; height: 100px; }
+            .contact-btns { justify-content: center; flex-wrap: wrap; }
+            .floating-contact { display: flex; } /* 手機版開啟浮動名片 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="container">
+        <h2>🏠 房地合一稅 2.0 即時試算</h2>
+        
+        <div class="form-group">
+            <label>賣出總價 (萬元)</label>
+            <input type="number" id="sellPrice" placeholder="例如: 2000" inputmode="numeric">
+        </div>
+        
+        <div class="form-group">
+            <label>買入成本 (萬元)</label>
+            <input type="number" id="buyPrice" placeholder="例如: 1200" inputmode="numeric">
+        </div>
+        
+        <div class="form-group">
+            <label>可扣除費用 (萬元) <small style="font-weight:normal; color:#888; font-size:12px;">(仲介費、裝潢費等，無填寫則採3%推計)</small></label>
+            <input type="number" id="expense" value="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+            <label>土地漲價總數額 (萬元)</label>
+            <input type="number" id="landValueIncrease" value="0" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+            <label>持有年數 (年)</label>
+            <input type="number" id="years" placeholder="例如: 3.5" step="0.1" inputmode="decimal">
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <div class="checkbox-group">
+                <input type="checkbox" id="selfUse" style="width:20px; height:20px; cursor:pointer;">
+                <label for="selfUse">我符合自住優惠 (設籍並居住滿6年)</label>
+            </div>
+        </div>
+
+        <button onclick="calculateTax()">開始計算應納稅額</button>
+
+        <div id="result">
+            <div class="summary-item"><span>課稅所得 (稅基)：</span><span><strong id="resTaxBase">0</strong> 萬元</span></div>
+            <div class="summary-item"><span>適用稅率/條款：</span><span id="resRate" style="font-weight:bold; color:var(--accent-color);">0</span></div>
+            <div id="selfUseNote" class="summary-item" style="display:none; color: #27ae60; background: #e8f6ef; padding: 5px 10px; border-radius:4px; margin-top:5px;"><span>自住免稅額：</span><span>-400 萬元</span></div>
+            <div class="total-tax">預估應納稅額：<span id="resTotal">0</span> 萬元</div>
+            
+            <div style="margin-top:20px; text-align:center; border-top: 1px solid #eee; padding-top:15px;">
+                <p style="margin:0 0 10px 0; color:var(--primary-color); font-weight:bold;">覺得稅額太高？想知道合法節稅方法？</p>
+                <a href="https://line.me/ti/p/你的LINEID" class="btn-contact btn-line" target="_blank">📲 立即諮詢專家</a>
+            </div>
+
+            <p class="disclaimer">※ 本試算結果僅供參考，費用採推計基礎，不含重購退稅、繼承取得等特殊狀況。實際稅額以國稅局核定為準。複雜案件請務必諮詢專業地政士。</p>
+        </div>
+    </div>
+
+    <div class="agent-profile-card">
+        <img src="https://i.imgur.com/8Km9t4G.png" alt="王小明" class="agent-photo">
+        
+        <div class="agent-info">
+            <h3>王小明<span class="agent-tag">專業經紀人</span></h3>
+            <p class="agent-specialty">
+                <strong>專長：</strong>不動產節稅規劃、資產配置、百萬業績經紀人。<br>
+                證照：不動產經紀人字第XXXX號。
+            </p>
+            <p style="color:var(--accent-color); font-weight:bold; margin-bottom:10px; font-size:15px;">誠實・專業・把關，讓您買賣房產最安心。</p>
+            <div class="contact-btns">
+                <a href="https://line.me/ti/p/你的LINEID" target="_blank" class="btn-contact btn-line">加 LINE 諮詢</a>
+                <a href="tel:0912345678" class="btn-contact btn-phone">撥打電話</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="floating-contact">
+    <div class="floating-agent">
+        <img src="https://i.imgur.com/8Km9t4G.png" alt="王小明" class="floating-photo">
+        <div>
+            <div class="floating-name">王小明</div>
+            <div class="floating-title">您的稅務規劃專家</div>
+        </div>
+    </div>
+    <div class="contact-btns" style="gap:5px;">
+        <a href="https://line.me/ti/p/你的LINEID" target="_blank" class="btn-contact btn-line" style="padding: 6px 12px; font-size:13px;">LINE</a>
+        <a href="tel:0912345678" class="btn-contact btn-phone" style="padding: 6px 12px; font-size:13px;">電話</a>
+    </div>
+</div>
+
+<script>
+// 計算邏輯與原本相同
+function calculateTax() {
+    const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+    const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+    let expense = parseFloat(document.getElementById('expense').value) || 0;
+    const landValue = parseFloat(document.getElementById('landValueIncrease').value) || 0;
+    const years = parseFloat(document.getElementById('years').value) || 0;
+    const isSelfUse = document.getElementById('selfUse').checked;
+
+    if (sellPrice === 0 || buyPrice === 0 || years === 0) {
+        alert("請輸入完整的買賣價格與持有年數");
+        return;
+    }
+
+    if (expense === 0) {
+        expense = sellPrice * 0.03;
+        if (expense > 30) expense = 30;
+    }
+
+    let profit = sellPrice - buyPrice - expense - landValue;
+    
+    // 平盤或虧損，不用繳稅
+    if (profit <= 0) {
+        showResult(0, "無獲利", 0, false);
+        return;
+    }
+
+    let taxRate = 0;
+    let rateText = "";
+    let finalTax = 0;
+
+    if (isSelfUse && years >= 6) {
+        let taxableSelf = profit - 400;
+        if (taxableSelf < 0) taxableSelf = 0;
+        finalTax = taxableSelf * 0.1;
+        rateText = "自住優惠 10%";
+    } else {
+        if (years <= 2) {
+            taxRate = 0.45;
+            rateText = "45% (持有2年內)";
+        } else if (years <= 5) {
+            taxRate = 0.35;
+            rateText = "35% (持有2-5年)";
+        } else if (years <= 10) {
+            taxRate = 0.20;
+            rateText = "20% (持有5-10年)";
+        } else {
+            taxRate = 0.15;
+            rateText = "15% (持有超過10年)";
+        }
+        finalTax = profit * taxRate;
+    }
+
+    showResult(profit.toFixed(2), rateText, finalTax.toFixed(2), isSelfUse && years >= 6);
+    
+    // 計算完成後，自動捲動到結果區塊
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showResult(base, rate, total, isSelf) {
+    document.getElementById('resTaxBase').innerText = base;
+    document.getElementById('resRate').innerText = rate;
+    document.getElementById('resTotal').innerText = total;
+    document.getElementById('selfUseNote').style.display = isSelf ? 'flex' : 'none';
+    
+    const resDiv = document.getElementById('result');
+    resDiv.style.display = 'block';
+}
+</script>
+
+</body>
+</html>

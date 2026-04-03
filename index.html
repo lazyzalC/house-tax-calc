@@ -41,4 +41,173 @@
         .agent-banner { background: white; margin-top: 30px; padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 20px; border: 1px solid #ddd; }
         .agent-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
         .agent-info b { font-size: 18px; color: var(--primary); }
-        .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px
+        .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="tabs">
+        <div class="tab-btn active" onclick="switchTab(event, 'tab1')">1. 我要算繳多少稅</div>
+        <div class="tab-btn" onclick="switchTab(event, 'tab2')">2. 我想賺多少錢</div>
+    </div>
+
+    <div id="tab1" class="card active">
+        <h2>🏠 房地合一稅詳細試算</h2>
+        
+        <h3>取得成本 (當年買入)</h3>
+        <div class="form-row">
+            <div class="form-group"><label>購入房屋總價 (萬元)</label><input type="number" id="t1-buyPrice"></div>
+            <div class="form-group"><label>購入仲介費 (萬元)</label><input type="number" id="t1-buyAgency"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>代書費/規費/印花稅 (萬元)</label><input type="number" id="t1-buyFee"></div>
+            <div class="form-group"><label>裝修費用發票總額 (萬元)</label><input type="number" id="t1-renovation"></div>
+        </div>
+
+        <h3>售出資訊 (本次交易)</h3>
+        <div class="form-row">
+            <div class="form-group"><label>預計賣出總價 (萬元)</label><input type="number" id="t1-sellPrice"></div>
+            <div class="form-group"><label>本次仲介費/廣告費 (萬元)</label><input type="number" id="t1-sellAgency"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label>
+                <input type="number" id="t1-landValue" value="0">
+            </div>
+            <div class="form-group"><label>持有年數 (年)</label><input type="number" id="t1-years" step="0.1"></div>
+        </div>
+
+        <button onclick="calcTaxMode()">精算稅額結果</button>
+
+        <div id="res1" class="result-area">
+            <div class="res-line"><span>總扣除成本與費用：</span><span id="res1-cost">0</span> 萬</div>
+            <div class="res-line"><span>課稅所得 (稅基)：</span><span id="res1-base">0</span> 萬</div>
+            <div class="res-line"><span>適用稅率：</span><span id="res1-rate">0%</span></div>
+            <div class="res-highlight">預估應納稅額：<span id="res1-total">0</span> 萬</div>
+        </div>
+    </div>
+
+    <div id="tab2" class="card">
+        <h2>💰 目標獲利倒推成交價</h2>
+        
+        <h3>基本固定成本</h3>
+        <div class="form-row">
+            <div class="form-group"><label>原始購入總價 (萬元)</label><input type="number" id="t2-buyPrice"></div>
+            <div class="form-group"><label>持有年數 (年)</label><input type="number" id="t2-years"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>購入時仲介費+代書費 (萬元)</label><input type="number" id="t2-buyOther"></div>
+            <div class="form-group"><label>裝修發票總額 (萬元)</label><input type="number" id="t2-renovation"></div>
+        </div>
+
+        <h3>獲利目標與變動費率</h3>
+        <div class="form-row">
+            <div class="form-group"><label>我想「實拿」利潤 (萬元)</label><input type="number" id="t2-profit" placeholder="扣除所有稅費後的錢"></div>
+            <div class="form-group"><label>預計支付仲介費 (%)</label><input type="number" id="t2-agencyRate" value="4"></div>
+        </div>
+        <div class="form-group">
+            <label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label>
+            <input type="number" id="t2-landValue" value="0">
+        </div>
+
+        <button onclick="calcPriceMode()">倒推建議成交價</button>
+
+        <div id="res2" class="result-area">
+            <div class="res-highlight" style="color:var(--green)">建議成交總價：<span id="res2-sell">0</span> 萬</div>
+            <p style="font-size:14px; color:#555; line-height:1.8; border-top:1px solid #ccc; padding-top:10px;">
+                ● 預估房地合一稅：<span id="res2-tax">0</span> 萬<br>
+                ● 預估仲介費：<span id="res2-agency">0</span> 萬<br>
+                ● 總成本扣除：<span id="res2-totalCost">0</span> 萬 (含買入及稅費)<br>
+                <b>● 實拿獲利：約 <span id="res2-final">0</span> 萬</b>
+            </p>
+        </div>
+    </div>
+
+    <div class="agent-banner">
+        <img src="https://i.imgur.com/8Km9t4G.png" class="agent-img">
+        <div class="agent-info">
+            <b>陳佑浚 (柚子) | 房產財務規劃專家</b><br>
+            <small>17年實務經驗，精準掌握房地合一稅務配置</small><br>
+            <a href="https://line.me/ti/p/你的ID" class="btn-contact">💬 傳合約給我幫您精算</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(evt, tabId) {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    function getRate(y) {
+        if (y <= 2) return 0.45;
+        if (y <= 5) return 0.35;
+        if (y <= 10) return 0.20;
+        return 0.15;
+    }
+
+    // 模式 1 計算
+    function calcTaxMode() {
+        const buy = parseFloat(document.getElementById('t1-buyPrice').value) || 0;
+        const buyAg = parseFloat(document.getElementById('t1-buyAgency').value) || 0;
+        const buyFee = parseFloat(document.getElementById('t1-buyFee').value) || 0;
+        const reno = parseFloat(document.getElementById('t1-renovation').value) || 0;
+        const sell = parseFloat(document.getElementById('t1-sellPrice').value) || 0;
+        const sellAg = parseFloat(document.getElementById('t1-sellAgency').value) || 0;
+        const land = parseFloat(document.getElementById('t1-landValue').value) || 0;
+        const years = parseFloat(document.getElementById('t1-years').value) || 0;
+
+        const totalCost = buy + buyAg + buyFee + reno;
+        let taxBase = sell - totalCost - sellAg - land;
+        if (taxBase < 0) taxBase = 0;
+        
+        const rate = getRate(years);
+        const tax = taxBase * rate;
+
+        document.getElementById('res1-cost').innerText = (totalCost + sellAg).toFixed(1);
+        document.getElementById('res1-base').innerText = taxBase.toFixed(1);
+        document.getElementById('res1-rate').innerText = (rate * 100) + "%";
+        document.getElementById('res1-total').innerText = tax.toFixed(2);
+        document.getElementById('res1').style.display = 'block';
+    }
+
+    // 模式 2 倒推
+    function calcPriceMode() {
+        const buy = parseFloat(document.getElementById('t2-buyPrice').value) || 0;
+        const buyOther = parseFloat(document.getElementById('t2-buyOther').value) || 0;
+        const reno = parseFloat(document.getElementById('t2-renovation').value) || 0;
+        const targetProfit = parseFloat(document.getElementById('t2-profit').value) || 0;
+        const years = parseFloat(document.getElementById('t2-years').value) || 0;
+        const agRate = (parseFloat(document.getElementById('t2-agencyRate').value) || 0) / 100;
+        const land = parseFloat(document.getElementById('t2-landValue').value) || 0;
+        const rate = getRate(years);
+
+        const fixedCost = buy + buyOther + reno;
+        // 迴圈逼近計算建議成交價
+        let sell = buy + targetProfit + 10; 
+        let tax = 0;
+        let agencyFee = 0;
+
+        for (let i = 0; i < 200; i++) {
+            agencyFee = sell * agRate;
+            let taxBase = sell - fixedCost - agencyFee - land;
+            tax = taxBase > 0 ? taxBase * rate : 0;
+            let currentProfit = sell - fixedCost - agencyFee - tax;
+            if (Math.abs(currentProfit - targetProfit) < 0.1) break;
+            sell += (targetProfit - currentProfit);
+        }
+
+        document.getElementById('res2-sell').innerText = Math.round(sell);
+        document.getElementById('res2-tax').innerText = tax.toFixed(1);
+        document.getElementById('res2-agency').innerText = agencyFee.toFixed(1);
+        document.getElementById('res2-totalCost').innerText = (fixedCost + tax + agencyFee).toFixed(1);
+        document.getElementById('res2-final').innerText = targetProfit;
+        document.getElementById('res2').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

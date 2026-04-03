@@ -52,4 +52,119 @@
         <div class="form-row">
             <div class="form-group">
                 <label>代書費/規費/印花稅 (萬元)</label>
-                <input type
+                <input type="number" id="buyFee" value="0">
+                <p class="hint">取得房產時支付給地政士及政府的必要費用</p>
+            </div>
+        </div>
+
+        <h3>2. 改良與裝修費用 (需有發票證明)</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>裝潢/水電維護費 (萬元)</label>
+                <input type="number" id="renovation" value="0">
+                <p class="hint">限非消耗性、增加房屋價值的支出（需發票）</p>
+            </div>
+        </div>
+
+        <h3>3. 本次售出資訊</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>預計賣出總價 (萬元)</label>
+                <input type="number" id="sellPrice" placeholder="必填">
+            </div>
+            <div class="form-group">
+                <label>售出仲介費/廣告費 (萬元)</label>
+                <input type="number" id="sellAgency" value="0">
+                <p class="hint">若不確定，可採總價 3~4% 估算</p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>土地漲價總數額 (萬元)</label>
+                <input type="number" id="landValue" value="0">
+                <p class="hint">請參考土增稅單，若無則填 0</p>
+            </div>
+            <div class="form-group">
+                <label>持有年數 (年)</label>
+                <input type="number" id="years" placeholder="影響稅率" step="0.1">
+            </div>
+        </div>
+
+        <button onclick="calculateProfessional()">立即精算應納稅額</button>
+
+        <div id="result-area">
+            <div class="res-item"><span>取得總成本：</span><span id="res-total-cost">0</span> 萬</div>
+            <div class="res-item"><span>移轉總費用：</span><span id="res-total-exp">0</span> 萬</div>
+            <div class="res-item"><span>土地漲價扣除：</span><span id="res-land">0</span> 萬</div>
+            <div class="res-item"><span>課稅所得 (稅基)：</span><span id="res-base">0</span> 萬</div>
+            <div class="res-item"><span>適用稅率：</span><span id="res-rate">0%</span></div>
+            <div class="res-total">預估繳稅：<span id="res-tax">0</span> 萬元</div>
+            <p style="font-size: 11px; color: #666; margin-top: 15px; text-align: center;">
+                ※ 此試算包含您填寫的各項單據成本，請確保發票/契約留存。
+            </p>
+        </div>
+    </div>
+
+    <div class="agent-footer">
+        <img src="https://i.imgur.com/8Km9t4G.png" class="agent-img">
+        <div>
+            <div style="font-weight:bold;">陳佑浚 (柚子) | 房產專家</div>
+            <div style="font-size:12px; opacity:0.8;">17年地產經驗，專精稅務節能與資產活化</div>
+            <a href="https://line.me/ti/p/你的ID" class="contact-btn">💬 傳單據給我幫您看</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateProfessional() {
+    // 取得輸入值
+    const buyPrice = parseFloat(document.getElementById('buyPrice').value) || 0;
+    const buyAgency = parseFloat(document.getElementById('buyAgency').value) || 0;
+    const buyFee = parseFloat(document.getElementById('buyFee').value) || 0;
+    const renovation = parseFloat(document.getElementById('renovation').value) || 0;
+    
+    const sellPrice = parseFloat(document.getElementById('sellPrice').value) || 0;
+    const sellAgency = parseFloat(document.getElementById('sellAgency').value) || 0;
+    const landValue = parseFloat(document.getElementById('landValue').value) || 0;
+    const years = parseFloat(document.getElementById('years').value) || 0;
+
+    if (buyPrice === 0 || sellPrice === 0 || years === 0) {
+        alert("請至少填入買入總價、賣出總價及持有年數");
+        return;
+    }
+
+    // 1. 計算取得總成本 (買價 + 仲介費 + 代書費 + 裝修費)
+    const totalCost = buyPrice + buyAgency + buyFee + renovation;
+
+    // 2. 計算移轉費用
+    // 若填寫的售出仲介費小於推計費用(5% or 3%)，通常會取高，這裡我們採實報實銷
+    const totalExp = sellAgency;
+
+    // 3. 計算稅基 = 賣價 - 取得總成本 - 移轉費用 - 土地漲價總數額
+    let taxBase = sellPrice - totalCost - totalExp - landValue;
+    if (taxBase < 0) taxBase = 0;
+
+    // 4. 判斷稅率
+    let rate = 0;
+    if (years <= 2) rate = 0.45;
+    else if (years <= 5) rate = 0.35;
+    else if (years <= 10) rate = 0.20;
+    else rate = 0.15;
+
+    const finalTax = taxBase * rate;
+
+    // 顯示結果
+    document.getElementById('res-total-cost').innerText = totalCost.toFixed(1);
+    document.getElementById('res-total-exp').innerText = totalExp.toFixed(1);
+    document.getElementById('res-land').innerText = landValue.toFixed(1);
+    document.getElementById('res-base').innerText = taxBase.toFixed(1);
+    document.getElementById('res-rate').innerText = (rate * 100) + "%";
+    document.getElementById('res-tax').innerText = finalTax.toFixed(2);
+
+    document.getElementById('result-area').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

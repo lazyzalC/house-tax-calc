@@ -3,172 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>房地產利潤與稅務助手 - 您的專屬顧問</title>
+    <title>房地合一稅專業試算系統 - 柚子房產專家</title>
     <style>
-        :root { --primary: #2c3e50; --accent: #d35400; --bg: #f8fafc; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
-        .main-wrapper { max-width: 800px; margin: 0 auto; padding: 20px; }
+        :root { --primary: #2c3e50; --accent: #d35400; --bg: #f4f7f6; --green: #27ae60; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
+        .wrapper { max-width: 700px; margin: 20px auto; padding: 0 15px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h2 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 15px; margin-bottom: 25px; font-size: 20px; }
+        h3 { font-size: 16px; color: #555; background: #eee; padding: 8px 12px; border-radius: 5px; margin-top: 20px; }
         
-        /* Tab 切換樣式 */
-        .tabs { display: flex; margin-bottom: 20px; background: #eee; border-radius: 10px; padding: 5px; }
-        .tab-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-        .tab-btn.active { background: white; color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .tab-content { display: none; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .tab-content.active { display: block; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; min-width: 250px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #333; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; }
+        input:focus { border-color: var(--accent); outline: none; background: #fffcf9; }
+        
+        .hint { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.4; }
+        button { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #a04000; box-shadow: 0 4px 12px rgba(211, 84, 0, 0.3); }
 
-        h2 { text-align: center; color: var(--primary); margin-top: 0; font-size: 22px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 15px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .help-text { font-size: 12px; color: #e67e22; margin-top: 4px; cursor: help; }
+        #result-area { display: none; background: #e8f6ef; border: 2px solid var(--green); padding: 20px; border-radius: 10px; margin-top: 25px; }
+        .res-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #bedbc8; }
+        .res-total { text-align: center; font-size: 28px; color: #e74c3c; font-weight: bold; margin-top: 15px; }
         
-        button { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        .result-box { margin-top: 25px; padding: 20px; border-radius: 8px; border: 2px solid #27ae60; background: #fff; }
-        .highlight { font-size: 26px; color: #e74c3c; font-weight: bold; display: block; text-align: center; margin: 10px 0; }
-        
-        /* 形象廣告 */
-        .agent-card { background: white; padding: 20px; border-radius: 12px; margin-top: 30px; display: flex; align-items: center; gap: 20px; border-left: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .agent-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-        .btn-line { background: #00b900; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 14px; }
-        
-        @media (max-width: 600px) { .agent-card { flex-direction: column; text-align: center; } }
+        /* 個人名片 */
+        .agent-footer { background: #2c3e50; color: white; padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 20px; }
+        .agent-img { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fff; }
+        .contact-btn { background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 13px; display: inline-block; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <div class="tabs">
-        <div class="tab-btn active" onclick="openTab('calc-tax')">計算應繳稅額</div>
-        <div class="tab-btn" onclick="openTab('calc-price')">我要賺多少錢</div>
-    </div>
-
-    <div id="calc-tax" class="tab-content active">
-        <h2>🏠 房地合一稅試算</h2>
-        <div class="form-group">
-            <label>賣出總價 (萬元)</label>
-            <input type="number" id="t-sell" placeholder="預計賣多少">
-        </div>
-        <div class="form-group">
-            <label>買入成本 (萬元)</label>
-            <input type="number" id="t-buy" placeholder="當初買多少">
-        </div>
-        <div class="form-group">
-            <label>持有年數</label>
-            <input type="number" id="t-year" placeholder="例如: 3">
-        </div>
-        <button onclick="runTax()">開始試算</button>
-        <div id="res-tax" style="display:none;" class="result-box">
-            <p>預估應納稅額：<span class="highlight" id="res-tax-val">0</span> 萬元</p>
-            <p style="font-size:13px; color:#666; text-align:center;">(含費用推計與稅率自動判定)</p>
-        </div>
-    </div>
-
-    <div id="calc-price" class="tab-content">
-        <h2>💰 目標獲利倒推賣價</h2>
-        <div class="form-group">
-            <label>原始買入成本 (萬元)</label>
-            <input type="number" id="p-buy" placeholder="例如: 1200">
-        </div>
-        <div class="form-group">
-            <label>我想「實拿」多少利潤? (萬元)</label>
-            <input type="number" id="p-profit" placeholder="例如: 200 (扣除稅費後拿進口袋的錢)">
-        </div>
-        <div class="form-group">
-            <label>持有年數</label>
-            <input type="number" id="p-year" placeholder="影響稅率判斷">
-        </div>
-        <div class="form-group">
-            <label>預計負擔仲介費 (%)</label>
-            <input type="number" id="p-agency" value="4">
-        </div>
-        <button onclick="runInvertPrice()">計算建議售價</button>
-        <div id="res-price" style="display:none;" class="result-box">
-            <p>建議成交總價約：<span class="highlight" id="res-price-val">0</span> 萬元</p>
-            <p style="font-size:14px; line-height:1.6;">
-                💡 <b>成本結構預估：</b><br>
-                - 預估房地合一稅：<span id="res-p-tax"></span> 萬<br>
-                - 預估仲介服務費：<span id="res-p-fee"></span> 萬<br>
-                - 原始買入成本：<span id="res-p-buy"></span> 萬<br>
-                ---<br>
-                <b>結餘實拿利潤：約 <span id="res-p-final"></span> 萬</b>
-            </p>
-        </div>
-    </div>
-
-    <div class="agent-card">
-        <img src="https://i.imgur.com/8Km9t4G.png" class="agent-img">
-        <div>
-            <div style="font-weight:bold; font-size:18px;">您的專業經紀人 - 陳佑浚 (柚子)</div>
-            <p style="font-size:14px; color:#666; margin: 5px 0;">17年房產實戰經驗，為您守護每一分利潤。</p>
-            <a href="https://line.me/ti/p/你的ID" class="btn-line">預約精準稅務規劃</a>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    function getTaxRate(years) {
-        if (years <= 2) return 0.45;
-        if (years <= 5) return 0.35;
-        if (years <= 10) return 0.20;
-        return 0.15;
-    }
-
-    // 基本稅額計算
-    function runTax() {
-        const sell = parseFloat(document.getElementById('t-sell').value) || 0;
-        const buy = parseFloat(document.getElementById('t-buy').value) || 0;
-        const years = parseFloat(document.getElementById('t-year').value) || 0;
+<div class="wrapper">
+    <div class="card">
+        <h2>📊 房地合一稅 2.0 專業核實試算</h2>
         
-        const expense = Math.min(sell * 0.03, 30); // 推計費用
-        const profit = sell - buy - expense;
-        const tax = profit > 0 ? profit * getTaxRate(years) : 0;
-        
-        document.getElementById('res-tax-val').innerText = tax.toFixed(2);
-        document.getElementById('res-tax').style.display = 'block';
-    }
-
-    // 核心功能：倒推賣價 (使用簡單迴圈逼近法)
-    function runInvertPrice() {
-        const buy = parseFloat(document.getElementById('p-buy').value) || 0;
-        const targetProfit = parseFloat(document.getElementById('p-profit').value) || 0;
-        const years = parseFloat(document.getElementById('p-year').value) || 0;
-        const agencyPercent = (parseFloat(document.getElementById('p-agency').value) || 0) / 100;
-        const rate = getTaxRate(years);
-
-        let estimateSell = buy + targetProfit; // 初始起跳價
-        let finalTax = 0;
-        let finalFee = 0;
-        let currentProfit = 0;
-
-        // 簡單迭代計算 (為了精確計算包含稅與服務費的連鎖影響)
-        for (let i = 0; i < 100; i++) {
-            finalFee = estimateSell * agencyPercent;
-            const expense = Math.min(estimateSell * 0.03, 30); 
-            // 房地合一稅計算 (假設費用取大值：實際仲介費與推計費用擇高)
-            const taxBase = estimateSell - buy - Math.max(finalFee, expense);
-            finalTax = taxBase > 0 ? taxBase * rate : 0;
-            
-            currentProfit = estimateSell - buy - finalFee - finalTax;
-            
-            if (Math.abs(currentProfit - targetProfit) < 0.1) break;
-            estimateSell += (targetProfit - currentProfit); // 調整差距
-        }
-
-        document.getElementById('res-price-val').innerText = Math.round(estimateSell);
-        document.getElementById('res-p-tax').innerText = finalTax.toFixed(1);
-        document.getElementById('res-p-fee').innerText = finalFee.toFixed(1);
-        document.getElementById('res-p-buy').innerText = buy;
-        document.getElementById('res-p-final').innerText = targetProfit;
-        document.getElementById('res-price').style.display = 'block';
-    }
-</script>
-
-</body>
-</html>
+        <h3>1. 購入成本 (取得時)</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>購入房屋總價 (萬元)</label>
+                <input type="number" id="buyPrice" placeholder="必填">
+            </div>
+            <div class="form-group">
+                <label>購入仲介費 (萬元)</label>
+                <input type="number" id="buyAgency" value="0">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>代書費/規費/印花稅 (萬元)</label>
+                <input type

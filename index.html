@@ -12,6 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="房產稅算">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         :root { --primary: #2c3e50; --accent: #d35400; --bg: #f4f7f6; --green: #27ae60; --blue: #2980b9; --light-blue: #eef2f7; }
         
@@ -26,14 +28,65 @@
         }
 
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; }
-        .wrapper { max-width: 800px; margin: 20px auto; padding: 0 15px; position: relative; z-index: 1; }
+        .wrapper { max-width: 800px; margin: 10px auto; padding: 0 15px; position: relative; z-index: 1; background: transparent; }
         
-        /* 分頁標籤 */
+        .main-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .shiba-logo {
+            width: 50px;
+            height: 45px;
+            background: #2c3e50;
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .shiba-logo::before, .shiba-logo::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            width: 18px;
+            height: 25px;
+            background: #2c3e50;
+            border-radius: 8px 8px 0 0;
+        }
+        .shiba-logo::before { left: 5px; transform: rotate(-15deg); }
+        .shiba-logo::after { right: 5px; transform: rotate(15deg); }
+        .eyebrows {
+            position: absolute;
+            top: 12px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 8px;
+            box-sizing: border-box;
+        }
+        .eyebrows::before, .eyebrows::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #f7d794;
+            border-radius: 50%;
+        }
+
+        .main-header h1 { font-size: 22px; color: var(--primary); margin: 0; text-align: center; }
+        .main-header small { color: #666; font-size: 14px; margin-top: 5px; }
+
         .tabs { display: flex; background: rgba(44, 62, 80, 0.9); border-radius: 12px 12px 0 0; overflow: hidden; backdrop-filter: blur(5px); }
         .tab-btn { flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: transparent; color: #bbb; border: none; font-size: 14px; }
         .tab-btn.active { background: rgba(255, 255, 255, 0.95); color: var(--accent); border-top: 4px solid var(--accent); }
         
-        /* 卡片效果 */
         .card { 
             background: rgba(255, 255, 255, 0.9); 
             padding: 25px; 
@@ -54,13 +107,12 @@
         .form-group { flex: 1; min-width: 240px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: rgba(255, 255, 255, 0.9); transition: 0.3s; }
-        input:focus, select:focus { border-color: var(--accent); outline: none; background: #fff; }
         
-        .tooltip { display: inline-block; position: relative; margin-left: 5px; cursor: help; background: #999; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; font-size: 12px; line-height: 18px; }
-        .tooltip:hover::after { content: "土地漲價總數額 = \A 當期公告土地現值 \A - 前次移轉現值 \A x 物價指數修正 \A (請直接查閱土增稅單最準確)"; position: absolute; left: 25px; top: 0; background: #333; color: white; padding: 10px; border-radius: 5px; width: 220px; white-space: pre-wrap; z-index: 10; font-weight: normal; font-size: 13px; text-align: left; }
-
         button.calc-btn { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        button.calc-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        
+        /* 匯出按鈕樣式 */
+        .export-btn { width: 100%; padding: 12px; background: #555; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; opacity: 0.9; transition: 0.3s; }
+        .export-btn:hover { background: #333; opacity: 1; }
 
         .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: rgba(238, 242, 247, 0.95); border: 1px solid #cbd5e0; }
         .res-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
@@ -78,18 +130,27 @@
             backdrop-filter: blur(10px);
         }
         .agent-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .agent-info b { font-size: 17px; color: var(--primary); }
         .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: 0.3s; font-weight: bold; }
-        .btn-contact:hover { background: #009800; transform: scale(1.05); }
         
         .note { font-size: 12px; color: #666; margin-top: 15px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 10px; }
+
+        /* 針對匯出時的微調 */
+        .html2canvas-container { width: 800px !important; height: auto !important; }
     </style>
 </head>
 <body>
 
 <div id="particles-js"></div>
 
-<div class="wrapper">
+<div class="wrapper" id="captureArea">
+    <div class="main-header">
+        <div class="shiba-logo">
+            <div class="eyebrows"></div>
+        </div>
+        <h1>房地合一與租賃財務助手</h1>
+        <small>17年專家陳佑浚監製</small>
+    </div>
+
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab(event, 'tab1')">1. 房地合一稅</div>
         <div class="tab-btn" onclick="switchTab(event, 'tab2')">2. 獲利成交倒推</div>
@@ -107,22 +168,16 @@
             <div class="form-group"><label>代書費/規費/印花稅 (萬元)</label><input type="number" id="t1-buyFee"></div>
             <div class="form-group"><label>裝修費用發票總額 (萬元)</label><input type="number" id="t1-renovation"></div>
         </div>
-
         <h3>售出資訊 (本次交易)</h3>
         <div class="form-row">
             <div class="form-group"><label>預計賣出總價 (萬元)</label><input type="number" id="t1-sellPrice"></div>
             <div class="form-group"><label>本次仲介費/廣告費 (萬元)</label><input type="number" id="t1-sellAgency"></div>
         </div>
         <div class="form-row">
-            <div class="form-group">
-                <label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label>
-                <input type="number" id="t1-landValue" value="0">
-            </div>
+            <div class="form-group"><label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label><input type="number" id="t1-landValue" value="0"></div>
             <div class="form-group"><label>持有年數 (年)</label><input type="number" id="t1-years" step="0.1"></div>
         </div>
-
         <button class="calc-btn" onclick="calcTaxMode()">精算稅額結果</button>
-
         <div id="res1" class="result-area">
             <div class="res-line"><span>總扣除成本與費用：</span><span id="res1-cost">0</span> 萬</div>
             <div class="res-line"><span>課稅所得 (稅基)：</span><span id="res1-base">0</span> 萬</div>
@@ -142,19 +197,13 @@
             <div class="form-group"><label>購入時仲介費+代書費 (萬元)</label><input type="number" id="t2-buyOther"></div>
             <div class="form-group"><label>裝修發票總額 (萬元)</label><input type="number" id="t2-renovation"></div>
         </div>
-
         <h3>獲利目標與變動費率</h3>
         <div class="form-row">
             <div class="form-group"><label>我想「實拿」利潤 (萬元)</label><input type="number" id="t2-profit" placeholder="扣除所有稅費後的淨利"></div>
             <div class="form-group"><label>預計支付仲介費 (%)</label><input type="number" id="t2-agencyRate" value="4"></div>
         </div>
-        <div class="form-group">
-            <label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label>
-            <input type="number" id="t2-landValue" value="0">
-        </div>
-
+        <div class="form-group"><label>土地漲價總數額 (萬元) <span class="tooltip">?</span></label><input type="number" id="t2-landValue" value="0"></div>
         <button class="calc-btn" onclick="calcPriceMode()">倒推建議成交價</button>
-
         <div id="res2" class="result-area">
             <div class="res-highlight" style="color:var(--green)">建議成交總價：<span id="res2-sell">0</span> 萬</div>
             <div class="res-line"><span>預估房地合一稅：</span><span id="res2-tax">0</span> 萬</div>
@@ -174,47 +223,27 @@
                     <option value="2">由實拿推租金 (Net to Gross)</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label id="rentLabel">月租金總額 (含稅)</label>
-                <input type="number" id="rentInput" placeholder="請輸入金額">
-            </div>
+            <div class="form-group"><label id="rentLabel">月租金總額 (含稅)</label><input type="number" id="rentInput" placeholder="請輸入金額"></div>
         </div>
-        
         <div class="form-row">
-            <div class="form-group">
-                <label>租客身份</label>
-                <select id="tenantType">
-                    <option value="company">公司 / 法人 (需代扣繳)</option>
-                    <option value="individual">個人 (不需代扣繳)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>房東身分 (影響年度所得稅)</label>
-                <select id="landlordType">
-                    <option value="general">一般房東 (費用率 43%)</option>
-                    <option value="public">公益出租人 (免稅 1.5 萬 + 43%)</option>
-                    <option value="social">社宅包租代管 (免稅 1.5 萬 + 60%)</option>
-                </select>
-            </div>
+            <div class="form-group"><label>租客身份</label><select id="tenantType"><option value="company">公司 / 法人 (需代扣繳)</option><option value="individual">個人 (不需代扣繳)</option></select></div>
+            <div class="form-group"><label>房東身分 (影響年度所得稅)</label><select id="landlordType"><option value="general">一般房東 (費用率 43%)</option><option value="public">公益出租人 (免稅 1.5 萬 + 43%)</option><option value="social">社宅包租代管 (免稅 1.5 萬 + 60%)</option></select></div>
         </div>
-
         <button class="calc-btn" onclick="calcRental()" style="background: var(--blue);">開始租賃稅費試算</button>
-
         <div id="res3" class="result-area">
             <div id="rentResultContent"></div>
-            <div class="note">
-                * 2026 門檻：租金達 20,000 元（含）以上需扣繳 10% 及 二代健保 2.11%。<br>
-                * 實拿推算法公式為：租金 = 實拿 / (1 - 0.10 - 0.0211) = 實拿 / 0.8789。
-            </div>
+            <div class="note">* 2026 門檻：租金達 20,000 元（含）以上需扣繳 10% 及 二代健保 2.11%。<br>* 實拿推算法公式為：租金 = 實拿 / (1 - 0.10 - 0.0211) = 實拿 / 0.8789。</div>
         </div>
     </div>
+
+    <button class="export-btn" onclick="exportAsImage()">📸 匯出計算結果圖檔</button>
 
     <div class="agent-banner">
         <img src="https://i.ibb.co/yBmSR26p/IMG-1225.jpg" class="agent-img" alt="專家頭像">
         <div class="agent-info">
             <b>陳佑浚 (柚子) | 房產財務規劃專家</b><br>
             <small>17年實務經驗，精準掌握房地合一稅務配置</small><br>
-            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 加line免費諮詢</a>
+            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 傳合約給我幫您精算</a>
         </div>
     </div>
 </div>
@@ -222,29 +251,54 @@
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
 <script>
-    /* 啟動 Service Worker 離線功能 */
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('離線功能準備就緒！'))
-                .catch(err => console.log('離線功能啟動失敗', err));
+    /* 匯出功能邏輯 */
+    function exportAsImage() {
+        const element = document.getElementById('captureArea');
+        const btn = document.querySelector('.export-btn');
+        
+        // 匯出時暫時隱藏匯出按鈕本身，避免出現在圖中
+        btn.style.display = 'none';
+
+        html2canvas(element, {
+            useCORS: true, // 允許跨域圖片 (如頭像)
+            backgroundColor: "#f4f7f6", // 背景色
+            scale: 2, // 提高解析度 (2倍)
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = '房產稅費計算結果_' + new Date().getTime() + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // 恢復匯出按鈕顯示
+            btn.style.display = 'block';
+        }).catch(err => {
+            alert("匯出失敗，請手動截圖。");
+            btn.style.display = 'block';
         });
     }
 
-    /* 初始化背景特效 */
-    particlesJS("particles-js", {
-        "particles": {
-            "number": { "value": 50, "density": { "enable": true, "value_area": 800 } },
-            "color": { "value": "#2c3e50" },
-            "shape": { "type": "circle" },
-            "opacity": { "value": 0.2 },
-            "size": { "value": 3 },
-            "line_linked": { "enable": true, "distance": 150, "color": "#2c3e50", "opacity": 0.2, "width": 1 },
-            "move": { "enable": true, "speed": 1.2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
-        },
-        "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": true, "mode": "grab" }, "resize": true } },
-        "retina_detect": true
-    });
+    /* 原有邏輯 */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => {});
+        });
+    }
+
+    try {
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 50, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#2c3e50" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.2 },
+                "size": { "value": 3 },
+                "line_linked": { "enable": true, "distance": 150, "color": "#2c3e50", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 1.2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
+            },
+            "interactivity": { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" }, resize: true } },
+            "retina_detect": true
+        });
+    } catch (e) {}
 
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
@@ -254,13 +308,9 @@
     }
 
     function getRate(y) {
-        if (y <= 2) return 0.45;
-        if (y <= 5) return 0.35;
-        if (y <= 10) return 0.20;
-        return 0.15;
+        if (y <= 2) return 0.45; if (y <= 5) return 0.35; if (y <= 10) return 0.20; return 0.15;
     }
 
-    // 1. 房地合一計算
     function calcTaxMode() {
         const buy = parseFloat(document.getElementById('t1-buyPrice').value) || 0;
         const buyAg = parseFloat(document.getElementById('t1-buyAgency').value) || 0;
@@ -270,14 +320,11 @@
         const sellAg = parseFloat(document.getElementById('t1-sellAgency').value) || 0;
         const land = parseFloat(document.getElementById('t1-landValue').value) || 0;
         const years = parseFloat(document.getElementById('t1-years').value) || 0;
-
         const totalBuyCost = buy + buyAg + buyFee + reno;
         let taxBase = sell - totalBuyCost - sellAg - land;
         if (taxBase < 0) taxBase = 0;
-        
         const rate = getRate(years);
         const tax = taxBase * rate;
-
         document.getElementById('res1-cost').innerText = totalBuyCost.toFixed(1);
         document.getElementById('res1-base').innerText = taxBase.toFixed(1);
         document.getElementById('res1-rate').innerText = (rate * 100) + "%";
@@ -285,7 +332,6 @@
         document.getElementById('res1').style.display = 'block';
     }
 
-    // 2. 獲利倒推
     function calcPriceMode() {
         const buy = parseFloat(document.getElementById('t2-buyPrice').value) || 0;
         const buyOther = parseFloat(document.getElementById('t2-buyOther').value) || 0;
@@ -295,17 +341,13 @@
         const agRate = (parseFloat(document.getElementById('t2-agencyRate').value) || 0) / 100;
         const land = parseFloat(document.getElementById('t2-landValue').value) || 0;
         const rate = getRate(years);
-
         const fixedCost = buy + buyOther + reno;
         let sell = buy + targetProfit + (targetProfit * 0.4); 
-        let tax = 0;
-        let agencyFee = 0;
-
+        let tax = 0; let agencyFee = 0;
         for (let i = 0; i < 100; i++) {
             agencyFee = sell * agRate;
             let autoSellFee = Math.min(sell * 0.03, 30);
             let finalSellFee = Math.max(agencyFee, autoSellFee);
-
             let taxBase = sell - fixedCost - finalSellFee - land;
             tax = taxBase > 0 ? taxBase * rate : 0;
             let currentProfit = sell - fixedCost - finalSellFee - tax;
@@ -313,7 +355,6 @@
             if (Math.abs(diff) < 0.01) break;
             sell += diff; 
         }
-
         document.getElementById('res2-sell').innerText = Math.round(sell).toLocaleString();
         document.getElementById('res2-tax').innerText = tax.toFixed(1);
         document.getElementById('res2-agency').innerText = (sell * agRate).toFixed(1);
@@ -322,7 +363,6 @@
         document.getElementById('res2').style.display = 'block';
     }
 
-    // 3. 租賃稅費功能整合
     function updateRentLabel() {
         const mode = document.getElementById('rentMode').value;
         document.getElementById('rentLabel').innerText = mode === "1" ? "月租金總額 (含稅)" : "房東每月實拿金額 (淨額)";
@@ -330,48 +370,29 @@
 
     function calcRental() {
         const val = parseFloat(document.getElementById('rentInput').value);
-        if (isNaN(val) || val <= 0) {
-            alert("請輸入有效的租金金額。");
-            return;
-        }
-
+        if (isNaN(val) || val <= 0) { alert("請輸入有效的租金金額。"); return; }
         const mode = document.getElementById('rentMode').value;
         const tenant = document.getElementById('tenantType').value;
         const landlord = document.getElementById('landlordType').value;
-        
         let grossRent, netCash, withholding = 0, nhi = 0;
-
         if (mode === "1") {
             grossRent = val;
-            if (tenant === 'company' && grossRent >= 20000) {
-                withholding = Math.round(grossRent * 0.10);
-                nhi = Math.round(grossRent * 0.0211);
-            }
+            if (tenant === 'company' && grossRent >= 20000) { withholding = Math.round(grossRent * 0.10); nhi = Math.round(grossRent * 0.0211); }
             netCash = grossRent - withholding - nhi;
         } else {
             if (tenant === 'company' && val >= 17578) {
-                grossRent = Math.round(val / 0.8789);
-                withholding = Math.round(grossRent * 0.10);
-                nhi = Math.round(grossRent * 0.0211);
-                netCash = val;
-            } else {
-                grossRent = val;
-                netCash = val;
-            }
+                grossRent = Math.round(val / 0.8789); withholding = Math.round(grossRent * 0.10); nhi = Math.round(grossRent * 0.0211); netCash = val;
+            } else { grossRent = val; netCash = val; }
         }
-
         let monthlyExemption = (landlord === 'general') ? 0 : 15000;
         let deductionRate = (landlord === 'social') ? 0.60 : 0.43;
         let taxableIncome = Math.max(0, (grossRent - monthlyExemption)) * (1 - deductionRate) * 12;
-
         document.getElementById('rentResultContent').innerHTML = `
             <div class="res-line"><span>合約應簽金額 (總額)：</span><b>${grossRent.toLocaleString()} 元</b></div>
             <div class="res-line"><span>每月預扣稅款 (10%)：</span><span>${withholding.toLocaleString()} 元</span></div>
             <div class="res-line"><span>每月二代健保 (2.11%)：</span><span>${nhi.toLocaleString()} 元</span></div>
             <div class="res-highlight">房東每月實拿：${netCash.toLocaleString()} 元</div>
-            <div class="res-line" style="border-top: 1px solid #ddd; margin-top:10px; padding-top:10px;">
-                <span>年度綜所稅參考所得額：</span><span class="highlight">${Math.round(taxableIncome).toLocaleString()} 元</span>
-            </div>
+            <div class="res-line" style="border-top: 1px solid #ddd; margin-top:10px; padding-top:10px;"><span>年度綜所稅參考所得額：</span><span class="highlight">${Math.round(taxableIncome).toLocaleString()} 元</span></div>
         `;
         document.getElementById('res3').style.display = 'block';
     }

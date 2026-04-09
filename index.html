@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#2c3e50">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="房產稅算">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -30,7 +30,6 @@
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; background-color: var(--bg); }
         .wrapper { max-width: 800px; margin: 10px auto; padding: 0 15px; position: relative; z-index: 1; background: transparent; }
         
-        /* 移除毛玻璃，改為實色不透明背景 */
         .main-header {
             display: flex;
             flex-direction: column;
@@ -38,7 +37,7 @@
             justify-content: center;
             padding: 20px 0;
             margin-bottom: 10px;
-            background: #ffffff; /* 實色 */
+            background: #ffffff;
             border-radius: 15px;
             border: 1px solid #dcdde1;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -88,9 +87,8 @@
         .tab-btn { flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: transparent; color: #bbb; border: none; font-size: 14px; }
         .tab-btn.active { background: #ffffff; color: var(--accent); border-top: 4px solid var(--accent); }
         
-        /* 移除毛玻璃，卡片改為純白 */
         .card { 
-            background: #ffffff; /* 純白 */
+            background: #ffffff;
             padding: 25px; 
             border-radius: 0 0 15px 15px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
@@ -121,7 +119,7 @@
         .res-highlight { font-size: 26px; color: #e74c3c; font-weight: bold; text-align: center; margin-top: 15px; }
 
         .agent-banner { 
-            background: #ffffff; /* 實色 */
+            background: #ffffff;
             margin-top: 30px; 
             padding: 20px; 
             border-radius: 15px; 
@@ -252,58 +250,93 @@
 </div>
 
 <script>
-    /* 核心分享邏輯 */
+    /* 核心分享與轉圖強化邏輯 */
     async function exportAndShare() {
         const area = document.getElementById('captureArea');
         const btn = document.getElementById('shareBtn');
+        
+        // 暫時隱藏按鈕避免入鏡
         btn.style.display = 'none';
 
         try {
             const canvas = await html2canvas(area, {
                 useCORS: true,
-                scale: 3, 
+                scale: 3, // 高解析度
                 backgroundColor: "#f4f7f6",
                 onclone: (clonedDoc) => {
+                    // 1. 在分身中注入強力黑化與描邊 CSS
+                    const style = clonedDoc.createElement('style');
+                    style.innerHTML = `
+                        /* 所有文字強制純黑、取消透明度、加深邊緣 */
+                        * { 
+                            color: #000000 !important; 
+                            opacity: 1 !important; 
+                            text-shadow: none !important;
+                            -webkit-text-stroke: 0.5px #000 !important;
+                        }
+                        /* 針對輸入框數值特別強化 */
+                        input, select { 
+                            color: #000000 !important; 
+                            font-weight: 900 !important; 
+                            background: #ffffff !important;
+                            border: 1px solid #000 !important;
+                        }
+                        /* 結果區背景刷白增加對比 */
+                        .result-area { 
+                            background: #ffffff !important; 
+                            border: 2px solid #000000 !important;
+                            display: block !important;
+                        }
+                        /* 橘色/綠色重點改為深色，防止太淺 */
+                        .res-highlight, .highlight { 
+                            color: #800000 !important; /* 深紅 */
+                            -webkit-text-stroke: 1px #800000 !important;
+                        }
+                        /* Shiba Logo 保持全黑 */
+                        .shiba-logo { background: #000000 !important; }
+                    `;
+                    clonedDoc.head.appendChild(style);
+
+                    // 2. 確保分身的卡片是實色
                     const cloneWrap = clonedDoc.getElementById('captureArea');
-                    const results = clonedDoc.querySelectorAll('.result-area');
-                    
                     cloneWrap.style.background = "#f4f7f6";
-                    // 強化轉圖文字清晰度
-                    clonedDoc.querySelectorAll('h1, h2, h3, label, span, b, div').forEach(el => {
-                        el.style.color = "#000000";
-                        el.style.opacity = "1";
-                    });
-                    results.forEach(res => {
-                        res.style.background = "#ffffff";
-                        res.style.border = "1px solid #333";
-                        res.style.display = "block";
-                    });
                 }
             });
 
-            btn.style.display = 'flex';
+            btn.style.display = 'flex'; // 恢復按鈕
 
+            // 3. 轉成檔案進行分享
             canvas.toBlob(async (blob) => {
-                const file = new File([blob], `房產試算_${new Date().getTime()}.png`, { type: "image/png" });
+                const file = new File([blob], `精算報告_${new Date().getTime()}.png`, { type: "image/png" });
+
+                // 使用原生 Web Share API (支援「儲存影像」到相簿或 LINE)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({ files: [file], title: '試算結果', text: '陳佑浚專家精算結果' });
-                    } catch (err) {}
+                        await navigator.share({
+                            files: [file],
+                            title: '財務試算報告',
+                            text: '陳佑浚專家為您精算之結果'
+                        });
+                    } catch (err) {
+                        // 使用者取消
+                    }
                 } else {
+                    // 不支援分享則退回自動下載
                     const link = document.createElement('a');
-                    link.download = '試算結果.png';
-                    link.href = canvas.toDataURL();
+                    link.download = '精算報告.png';
+                    link.href = canvas.toDataURL('image/png');
                     link.click();
-                    alert("已下載圖檔。");
+                    alert("已為您下載清晰版圖檔。");
                 }
             }, 'image/png');
+
         } catch (err) {
-            alert("產生圖片失敗");
+            alert("產生圖片失敗，請嘗試手動截圖。");
             btn.style.display = 'flex';
         }
     }
 
-    /* 計算邏輯 */
+    /* 以下為原有計算邏輯 (完全不變動) */
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

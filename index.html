@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#2c3e50">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="房產稅算">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -27,9 +27,10 @@
             background-color: #f4f7f6;
         }
 
-        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; }
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; background-color: var(--bg); }
         .wrapper { max-width: 800px; margin: 10px auto; padding: 0 15px; position: relative; z-index: 1; background: transparent; }
         
+        /* 移除毛玻璃，改為實色不透明背景 */
         .main-header {
             display: flex;
             flex-direction: column;
@@ -37,10 +38,10 @@
             justify-content: center;
             padding: 20px 0;
             margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.6);
+            background: #ffffff; /* 實色 */
             border-radius: 15px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid #dcdde1;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .shiba-logo {
@@ -83,57 +84,61 @@
         .main-header h1 { font-size: 22px; color: var(--primary); margin: 0; text-align: center; }
         .main-header small { color: #666; font-size: 14px; margin-top: 5px; }
 
-        .tabs { display: flex; background: rgba(44, 62, 80, 0.9); border-radius: 12px 12px 0 0; overflow: hidden; backdrop-filter: blur(5px); }
+        .tabs { display: flex; background: #2c3e50; border-radius: 12px 12px 0 0; overflow: hidden; }
         .tab-btn { flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: transparent; color: #bbb; border: none; font-size: 14px; }
-        .tab-btn.active { background: rgba(255, 255, 255, 0.95); color: var(--accent); border-top: 4px solid var(--accent); }
+        .tab-btn.active { background: #ffffff; color: var(--accent); border-top: 4px solid var(--accent); }
         
+        /* 移除毛玻璃，卡片改為純白 */
         .card { 
-            background: rgba(255, 255, 255, 0.9); 
+            background: #ffffff; /* 純白 */
             padding: 25px; 
             border-radius: 0 0 15px 15px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             display: none; 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid #dcdde1;
         }
         .card.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { color: var(--primary); font-size: 20px; margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; }
+        h2 { color: var(--primary); font-size: 20px; margin: 0 0 15px 0; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 10px; }
         h3 { font-size: 15px; color: var(--accent); margin: 20px 0 10px 0; display: flex; align-items: center; }
         h3::before { content: ""; display: inline-block; width: 4px; height: 15px; background: var(--accent); margin-right: 8px; }
         
         .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; }
         .form-group { flex: 1; min-width: 240px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: rgba(255, 255, 255, 0.9); transition: 0.3s; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 5px rgba(211, 84, 0, 0.2); }
         
         button.calc-btn { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        button.calc-btn:hover { background: var(--accent); }
         
-        /* 分享匯出按鈕樣式 */
         .export-btn { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
         .export-btn:hover { background: #000; }
 
-        .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: rgba(238, 242, 247, 0.95); border: 1px solid #cbd5e0; }
+        .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: #f8f9fa; border: 1px solid #cbd5e0; }
         .res-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
         .res-highlight { font-size: 26px; color: #e74c3c; font-weight: bold; text-align: center; margin-top: 15px; }
 
         .agent-banner { 
-            background: rgba(255, 255, 255, 0.85); 
+            background: #ffffff; /* 實色 */
             margin-top: 30px; 
             padding: 20px; 
             border-radius: 15px; 
             display: flex; 
             align-items: center; 
             gap: 20px; 
-            border: 1px solid rgba(255,255,255,0.4); 
-            backdrop-filter: blur(10px);
+            border: 1px solid #dcdde1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .agent-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .agent-info b { font-size: 17px; color: var(--primary); }
         .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: 0.3s; font-weight: bold; }
         
         .note { font-size: 12px; color: #666; margin-top: 15px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 10px; }
+        
+        .tooltip { display: inline-block; position: relative; margin-left: 5px; cursor: help; background: #999; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; font-size: 12px; line-height: 18px; }
+        .tooltip:hover::after { content: "土地漲價總數額 = \A 當期公告土地現值 \A - 前次移轉現值 \A x 物價指數修正 \A (請直接查閱土增稅單最準確)"; position: absolute; left: 25px; top: 0; background: #333; color: white; padding: 10px; border-radius: 5px; width: 220px; white-space: pre-wrap; z-index: 10; font-weight: normal; font-size: 13px; text-align: left; }
     </style>
 </head>
 <body>
@@ -247,73 +252,58 @@
 </div>
 
 <script>
-    /* 1. 解決顏色淺 & 2. 分享到相簿功能 */
+    /* 核心分享邏輯 */
     async function exportAndShare() {
         const area = document.getElementById('captureArea');
         const btn = document.getElementById('shareBtn');
-        
-        // 暫時隱藏按鈕避免入鏡
         btn.style.display = 'none';
 
         try {
             const canvas = await html2canvas(area, {
                 useCORS: true,
-                scale: 3, // 高解析度
+                scale: 3, 
                 backgroundColor: "#f4f7f6",
                 onclone: (clonedDoc) => {
-                    // 【解決顏色太淺關鍵】：強制刷黑分身的文字
                     const cloneWrap = clonedDoc.getElementById('captureArea');
                     const results = clonedDoc.querySelectorAll('.result-area');
-                    const highlights = clonedDoc.querySelectorAll('.res-highlight, .highlight');
                     
                     cloneWrap.style.background = "#f4f7f6";
+                    // 強化轉圖文字清晰度
                     clonedDoc.querySelectorAll('h1, h2, h3, label, span, b, div').forEach(el => {
-                        el.style.color = "#000000"; // 文字全黑
+                        el.style.color = "#000000";
                         el.style.opacity = "1";
                     });
                     results.forEach(res => {
-                        res.style.background = "#ffffff"; // 結果區改純白背景
+                        res.style.background = "#ffffff";
                         res.style.border = "1px solid #333";
                         res.style.display = "block";
                     });
-                    highlights.forEach(h => h.style.color = "#d35400"); // 保持橘色重點
                 }
             });
 
-            btn.style.display = 'flex'; // 恢復按鈕
+            btn.style.display = 'flex';
 
-            // 轉成 Blob 準備分享
             canvas.toBlob(async (blob) => {
-                const file = new File([blob], `試算結果_${new Date().getTime()}.png`, { type: "image/png" });
-
-                // 檢查是否支援原生分享 (Web Share API)
+                const file = new File([blob], `房產試算_${new Date().getTime()}.png`, { type: "image/png" });
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({
-                            files: [file],
-                            title: '房產稅費試算結果',
-                            text: '由陳佑浚專家監製之精算結果'
-                        });
-                    } catch (err) {
-                        // 使用者取消分享不執行
-                    }
+                        await navigator.share({ files: [file], title: '試算結果', text: '陳佑浚專家精算結果' });
+                    } catch (err) {}
                 } else {
-                    // 不支援分享則自動下載
                     const link = document.createElement('a');
                     link.download = '試算結果.png';
                     link.href = canvas.toDataURL();
                     link.click();
-                    alert("瀏覽器不支援直接分享，已為您下載圖檔。");
+                    alert("已下載圖檔。");
                 }
             }, 'image/png');
-
         } catch (err) {
-            alert("產生圖片失敗，請手動截圖。");
+            alert("產生圖片失敗");
             btn.style.display = 'flex';
         }
     }
 
-    /* 原有計算邏輯 */
+    /* 計算邏輯 */
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

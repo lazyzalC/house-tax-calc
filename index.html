@@ -3,88 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>房地合一與租賃財務助手 - 專家陳佑浚監製</title>
-    
+    <title>房地合一與租賃財務助手 - 17年專家陳佑浚監製</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="房產稅算">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <style>
         :root { --primary: #2c3e50; --accent: #d35400; --bg: #f4f7f6; --green: #27ae60; --blue: #2980b9; --light-blue: #eef2f7; }
-        
-        #particles-js {
-            position: fixed;
-            width: 100%; height: 100%;
-            top: 0; left: 0; z-index: -1;
-            background-color: #f4f7f6;
-        }
-
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; background-color: #f4f7f6; }
         body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #1a1a1a; background-color: var(--bg); }
         .wrapper { max-width: 800px; margin: 10px auto; padding: 0 15px; position: relative; z-index: 1; background: transparent; }
-        
-        /* 標題區顯色強化 */
-        .main-header {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px 0; margin-bottom: 10px;
-            background: #ffffff; border-radius: 15px;
-            border: 1px solid #dcdde1; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
+        .main-header { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; margin-bottom: 10px; background: #ffffff; border-radius: 15px; border: 1px solid #dcdde1; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .main-header h1 { font-size: 22px; color: #000000; margin: 0; font-weight: 800; }
         .main-header small { color: #333333; font-size: 14px; margin-top: 5px; font-weight: bold; }
-
-        .shiba-logo {
-            width: 50px; height: 45px; background: #2c3e50; border-radius: 50% 50% 45% 45%;
-            position: relative; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .shiba-logo::before, .shiba-logo::after {
-            content: ''; position: absolute; top: -12px; width: 18px; height: 25px; background: #2c3e50; border-radius: 8px 8px 0 0;
-        }
+        .shiba-logo { width: 50px; height: 45px; background: #2c3e50; border-radius: 50% 50% 45% 45%; position: relative; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .shiba-logo::before, .shiba-logo::after { content: ''; position: absolute; top: -12px; width: 18px; height: 25px; background: #2c3e50; border-radius: 8px 8px 0 0; }
         .shiba-logo::before { left: 5px; transform: rotate(-15deg); }
         .shiba-logo::after { right: 5px; transform: rotate(15deg); }
         .eyebrows::before, .eyebrows::after { content: ''; width: 10px; height: 10px; background: #f7d794; border-radius: 50%; }
-
-        /* 分頁顯色強化 */
         .tabs { display: flex; background: #2c3e50; border-radius: 12px 12px 0 0; overflow: hidden; }
         .tab-btn { flex: 1; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; transition: 0.3s; background: transparent; color: #ffffff; border: none; font-size: 14px; opacity: 0.7; }
         .tab-btn.active { background: #ffffff; color: var(--accent); border-top: 4px solid var(--accent); opacity: 1; }
-        
-        .card { 
-            background: #ffffff; padding: 25px; border-radius: 0 0 15px 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; border: 1px solid #dcdde1;
-        }
+        .card { background: #ffffff; padding: 25px; border-radius: 0 0 15px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; border: 1px solid #dcdde1; }
         .card.active { display: block; }
-
-        /* 關鍵修正：標籤與標題顏色加深 */
         h2 { color: #000000; font-size: 20px; margin: 0 0 15px 0; border-bottom: 2px solid #eee; padding-bottom: 10px; font-weight: 800; }
         h3 { font-size: 16px; color: #2c3e50; margin: 20px 0 10px 0; display: flex; align-items: center; font-weight: 800; }
         h3::before { content: ""; display: inline-block; width: 4px; height: 15px; background: var(--accent); margin-right: 8px; }
-        
         .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; }
         .form-group { flex: 1; min-width: 240px; }
-        
-        /* 關鍵修正：Label 顏色改為深色 */
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #2c3e50; }
         input, select { width: 100%; padding: 12px; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; color: #000; font-weight: bold; }
-        
         button.calc-btn { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        
-        /* 關鍵修正：結果區文字顏色加深 */
         .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: #fdfdfd; border: 2px solid #cbd5e0; }
         .res-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #666; color: #1a1a1a; font-weight: bold; font-size: 16px; }
         .res-highlight { font-size: 28px; color: #d63031; font-weight: 900; text-align: center; margin-top: 15px; }
-
         .export-btn { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-        .agent-banner { 
-            background: #ffffff; margin-top: 30px; padding: 20px; border-radius: 15px; 
-            display: flex; align-items: center; gap: 20px; border: 1px solid #dcdde1;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .agent-banner { background: #ffffff; margin-top: 30px; padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 20px; border: 1px solid #dcdde1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .agent-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
         .agent-info b { font-size: 18px; color: #000000; font-weight: 800; }
         .agent-info small { color: #333; font-weight: bold; }
@@ -92,22 +49,18 @@
     </style>
 </head>
 <body>
-
 <div id="particles-js"></div>
-
 <div class="wrapper" id="captureArea">
     <div class="main-header">
         <div class="shiba-logo"><div class="eyebrows"></div></div>
         <h1>房地合一與租賃財務助手</h1>
         <small>17年專家陳佑浚監製</small>
     </div>
-
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab(event, 'tab1')">1. 房地合一稅</button>
         <button class="tab-btn" onclick="switchTab(event, 'tab2')">2. 獲利成交倒推</button>
         <button class="tab-btn" onclick="switchTab(event, 'tab3')">3. 租賃稅費試算</button>
     </div>
-
     <div id="tab1" class="card active">
         <h2>🏠 房地合一稅詳細試算</h2>
         <h3>取得成本 (原始購入)</h3>
@@ -136,7 +89,6 @@
             <div class="res-highlight">預估應納稅額：<span id="res1-total">0</span> 萬</div>
         </div>
     </div>
-
     <div id="tab2" class="card">
         <h2>💰 目標獲利倒推成交價</h2>
         <h3>基本固定成本</h3>
@@ -161,7 +113,6 @@
             <div class="res-highlight" style="font-size: 20px; color:#333;">實拿獲利核對：約 <span id="res2-final">0</span> 萬</div>
         </div>
     </div>
-
     <div id="tab3" class="card">
         <h2>📑 租賃稅費專業試算 (2026)</h2>
         <div class="form-row">
@@ -181,26 +132,21 @@
         <button class="calc-btn" onclick="calcRental()">開始租賃試算</button>
         <div id="res3" class="result-area"><div id="rentResultContent"></div></div>
     </div>
-
     <button class="export-btn" id="shareBtn" onclick="exportAndShare()">📸 分享或儲存清晰精算報表</button>
-
     <div class="agent-banner">
         <img src="https://i.ibb.co/yBmSR26p/IMG-1225.jpg" class="agent-img">
         <div class="agent-info">
             <b>陳佑浚 (柚子) | 房產財務規劃專家</b><br>
             <small>17年實務經驗 · 誠信精算服務</small><br>
-            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 傳合約幫您精算</a>
+            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 加Line免費諮詢</a>
         </div>
     </div>
 </div>
-
 <script>
-    /* 強力加深轉圖邏輯 */
     async function exportAndShare() {
         const area = document.getElementById('captureArea');
         const btn = document.getElementById('shareBtn');
         btn.style.display = 'none';
-
         try {
             const canvas = await html2canvas(area, {
                 useCORS: true, scale: 3, backgroundColor: "#ffffff",
@@ -214,8 +160,6 @@
                         .shiba-logo { background: #000 !important; }
                     `;
                     clonedDoc.head.appendChild(style);
-                    
-                    // 狸貓換太子：將 input 換成純文字 span
                     clonedDoc.querySelectorAll('input, select').forEach(input => {
                         const val = input.value || input.placeholder || "0";
                         const textNode = clonedDoc.createElement('span');
@@ -225,7 +169,6 @@
                     });
                 }
             });
-
             btn.style.display = 'flex';
             canvas.toBlob(async (blob) => {
                 const file = new File([blob], `精算報告.png`, { type: "image/png" });
@@ -234,24 +177,19 @@
                 } else {
                     const link = document.createElement('a');
                     link.download = '精算結果.png'; link.href = canvas.toDataURL(); link.click();
-                    alert("已下載圖檔至相簿。");
                 }
             }, 'image/png');
-        } catch (err) { alert("失敗"); btn.style.display = 'flex'; }
+        } catch (err) { btn.style.display = 'flex'; }
     }
-
-    /* 計算邏輯 (保持原有) */
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         evt.currentTarget.classList.add('active');
     }
-
     function getRate(y) {
         if (y <= 2) return 0.45; if (y <= 5) return 0.35; if (y <= 10) return 0.20; return 0.15;
     }
-
     function calcTaxMode() {
         const buy = parseFloat(document.getElementById('t1-buyPrice').value) || 0;
         const buyAg = parseFloat(document.getElementById('t1-buyAgency').value) || 0;
@@ -270,7 +208,6 @@
         document.getElementById('res1-total').innerText = (taxBase * rate).toFixed(2);
         document.getElementById('res1').style.display = 'block';
     }
-
     function calcPriceMode() {
         const buy = parseFloat(document.getElementById('t2-buyPrice').value) || 0;
         const profit = parseFloat(document.getElementById('t2-profit').value) || 0;
@@ -288,15 +225,12 @@
         document.getElementById('res2-sell').innerText = Math.round(sell).toLocaleString();
         document.getElementById('res2-tax').innerText = ((Math.round(sell)-fixedCost-(Math.round(sell)*0.04))*rate).toFixed(1);
         document.getElementById('res2-agency').innerText = (Math.round(sell)*0.04).toFixed(1);
-        document.getElementById('res2-fixed').innerText = fixedCost.toFixed(1);
         document.getElementById('res2-final').innerText = profit;
         document.getElementById('res2').style.display = 'block';
     }
-
     function updateRentLabel() {
         document.getElementById('rentLabel').innerText = document.getElementById('rentMode').value === "1" ? "月租金總額 (含稅)" : "房東每月實拿金額 (淨額)";
     }
-
     function calcRental() {
         const val = parseFloat(document.getElementById('rentInput').value) || 0;
         const isCo = document.getElementById('tenantType').value === 'company';
@@ -316,11 +250,7 @@
         document.getElementById('res3').style.display = 'block';
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script>
-    try { particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "color": { "value": "#2c3e50" }, "opacity": { "value": 0.1 }, "size": { "value": 3 }, "line_linked": { "enable": true, "opacity": 0.1 }, "move": { "enable": true, "speed": 1 } } }); } catch(e){}
-</script>
-
+<script>try { particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "opacity": { "value": 0.1 }, "move": { "speed": 1 } } }); } catch(e){}</script>
 </body>
 </html>

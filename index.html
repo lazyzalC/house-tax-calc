@@ -34,6 +34,8 @@
         h3::before { content: ""; display: inline-block; width: 4px; height: 15px; background: var(--accent); margin-right: 8px; }
         .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; }
         .form-group { flex: 1; min-width: 240px; }
+        .form-check { display: flex; align-items: center; gap: 8px; margin: 10px 0; padding: 10px; background: var(--light-blue); border-radius: 8px; cursor: pointer; }
+        .form-check input { width: 20px; height: 20px; cursor: pointer; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; color: #2c3e50; }
         input, select { width: 100%; padding: 12px; border: 1px solid #999; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #fff; color: #000; font-weight: bold; }
         button.calc-btn { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
@@ -81,6 +83,10 @@
             <div class="form-group"><label>土地漲價總數額 (萬元)</label><input type="number" id="t1-landValue" value="0"></div>
             <div class="form-group"><label>持有年數 (年)</label><input type="number" id="t1-years" step="0.1"></div>
         </div>
+        <label class="form-check">
+            <input type="checkbox" id="t1-selfUse">
+            <span>符合自住優惠 (連續設籍6年, 400萬免稅額)</span>
+        </label>
         <button class="calc-btn" onclick="calcTaxMode()">精算稅額結果</button>
         <div id="res1" class="result-area">
             <div class="res-line"><span>總扣除成本與費用：</span><b id="res1-cost">0</b> 萬</div>
@@ -161,6 +167,7 @@
                     `;
                     clonedDoc.head.appendChild(style);
                     clonedDoc.querySelectorAll('input, select').forEach(input => {
+                        if(input.type === 'checkbox') return;
                         const val = input.value || input.placeholder || "0";
                         const textNode = clonedDoc.createElement('span');
                         textNode.innerText = val;
@@ -199,13 +206,25 @@
         const sellAg = parseFloat(document.getElementById('t1-sellAgency').value) || 0;
         const land = parseFloat(document.getElementById('t1-landValue').value) || 0;
         const years = parseFloat(document.getElementById('t1-years').value) || 0;
+        const isSelfUse = document.getElementById('t1-selfUse').checked;
+
         const totalBuyCost = buy + buyAg + buyFee + reno;
-        let taxBase = Math.max(0, sell - totalBuyCost - sellAg - land);
-        const rate = getRate(years);
+        let gain = sell - totalBuyCost - sellAg - land;
+        let taxBase = Math.max(0, gain);
+        let rate = getRate(years);
+        let tax = 0;
+
+        if (isSelfUse) {
+            taxBase = Math.max(0, taxBase - 400);
+            rate = 0.10;
+        }
+        
+        tax = taxBase * rate;
+
         document.getElementById('res1-cost').innerText = (totalBuyCost + sellAg).toFixed(1);
         document.getElementById('res1-base').innerText = taxBase.toFixed(1);
         document.getElementById('res1-rate').innerText = (rate * 100) + "%";
-        document.getElementById('res1-total').innerText = (taxBase * rate).toFixed(2);
+        document.getElementById('res1-total').innerText = tax.toFixed(2);
         document.getElementById('res1').style.display = 'block';
     }
     function calcPriceMode() {

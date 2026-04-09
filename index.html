@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>房地產財務助手 - 專家陳佑浚監製</title>
+    <title>房地合一與租賃財務助手 - 專家陳佑浚監製</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
@@ -27,7 +27,7 @@
             background-color: #f4f7f6;
         }
 
-        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; background-color: var(--bg); }
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; padding-bottom: 80px; color: #333; }
         .wrapper { max-width: 800px; margin: 10px auto; padding: 0 15px; position: relative; z-index: 1; background: transparent; }
         
         .main-header {
@@ -37,9 +37,9 @@
             justify-content: center;
             padding: 20px 0;
             margin-bottom: 10px;
-            background: #ffffff;
+            background: rgba(255, 255, 255, 1); /* 實色確保清晰 */
             border-radius: 15px;
-            border: 1px solid #dcdde1;
+            border: 1px solid rgba(255,255,255,0.3);
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
@@ -153,9 +153,9 @@
     </div>
 
     <div class="tabs">
-        <div class="tab-btn active" onclick="switchTab(event, 'tab1')">1. 房地合一稅</div>
-        <div class="tab-btn" onclick="switchTab(event, 'tab2')">2. 獲利成交倒推</div>
-        <div class="tab-btn" onclick="switchTab(event, 'tab3')">3. 租賃稅費試算</div>
+        <button class="tab-btn active" onclick="switchTab(event, 'tab1')">1. 房地合一稅</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab2')">2. 獲利成交倒推</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab3')">3. 租賃稅費試算</button>
     </div>
 
     <div id="tab1" class="card active">
@@ -250,93 +250,73 @@
 </div>
 
 <script>
-    /* 核心分享與轉圖強化邏輯 */
+    /* 核心分享與優化轉圖邏輯 */
     async function exportAndShare() {
         const area = document.getElementById('captureArea');
         const btn = document.getElementById('shareBtn');
-        
-        // 暫時隱藏按鈕避免入鏡
         btn.style.display = 'none';
 
         try {
             const canvas = await html2canvas(area, {
                 useCORS: true,
-                scale: 3, // 高解析度
+                scale: 3, 
                 backgroundColor: "#f4f7f6",
                 onclone: (clonedDoc) => {
-                    // 1. 在分身中注入強力黑化與描邊 CSS
+                    // 【核心修正 A】：將所有輸入框替換為純文字，解決數字太淺問題
+                    const inputs = clonedDoc.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        const val = input.value || input.placeholder || "0";
+                        const textNode = clonedDoc.createElement('span');
+                        textNode.innerText = val;
+                        textNode.style.cssText = "font-weight:bold; color:#000000; font-size:16px; padding-left:5px;";
+                        input.parentNode.replaceChild(textNode, input);
+                    });
+
+                    // 【核心修正 B】：注入強力黑化與加粗 CSS (只作用於圖檔分身)
                     const style = clonedDoc.createElement('style');
                     style.innerHTML = `
-                        /* 所有文字強制純黑、取消透明度、加深邊緣 */
-                        * { 
-                            color: #000000 !important; 
-                            opacity: 1 !important; 
-                            text-shadow: none !important;
-                            -webkit-text-stroke: 0.5px #000 !important;
-                        }
-                        /* 針對輸入框數值特別強化 */
-                        input, select { 
-                            color: #000000 !important; 
-                            font-weight: 900 !important; 
-                            background: #ffffff !important;
-                            border: 1px solid #000 !important;
-                        }
-                        /* 結果區背景刷白增加對比 */
-                        .result-area { 
-                            background: #ffffff !important; 
-                            border: 2px solid #000000 !important;
-                            display: block !important;
-                        }
-                        /* 橘色/綠色重點改為深色，防止太淺 */
-                        .res-highlight, .highlight { 
-                            color: #800000 !important; /* 深紅 */
-                            -webkit-text-stroke: 1px #800000 !important;
-                        }
-                        /* Shiba Logo 保持全黑 */
+                        * { color: #000000 !important; opacity: 1 !important; font-weight: 800 !important; }
+                        .result-area { background: #ffffff !important; border: 2px solid #000 !important; display: block !important; }
+                        .res-highlight, .highlight { color: #8b0000 !important; font-size: 24px !important; -webkit-text-stroke: 0.5px #8b0000; }
+                        .main-header, .agent-banner, .card { background: #ffffff !important; border: 1px solid #000 !important; }
                         .shiba-logo { background: #000000 !important; }
                     `;
                     clonedDoc.head.appendChild(style);
-
-                    // 2. 確保分身的卡片是實色
-                    const cloneWrap = clonedDoc.getElementById('captureArea');
-                    cloneWrap.style.background = "#f4f7f6";
                 }
             });
 
-            btn.style.display = 'flex'; // 恢復按鈕
+            btn.style.display = 'flex';
 
-            // 3. 轉成檔案進行分享
+            // 轉成 Blob 準備分享
             canvas.toBlob(async (blob) => {
                 const file = new File([blob], `精算報告_${new Date().getTime()}.png`, { type: "image/png" });
 
-                // 使用原生 Web Share API (支援「儲存影像」到相簿或 LINE)
+                // 檢查是否支援 Web Share API (手機端存相簿與傳 LINE 關鍵)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
                             files: [file],
-                            title: '財務試算報告',
+                            title: '房產財務試算報告',
                             text: '陳佑浚專家為您精算之結果'
                         });
-                    } catch (err) {
-                        // 使用者取消
-                    }
+                    } catch (err) {}
                 } else {
-                    // 不支援分享則退回自動下載
+                    // 不支援則自動下載
                     const link = document.createElement('a');
                     link.download = '精算報告.png';
-                    link.href = canvas.toDataURL('image/png');
+                    link.href = canvas.toDataURL();
                     link.click();
-                    alert("已為您下載清晰版圖檔。");
+                    alert("已下載圖檔。");
                 }
             }, 'image/png');
 
         } catch (err) {
-            alert("產生圖片失敗，請嘗試手動截圖。");
+            alert("產生圖片失敗");
             btn.style.display = 'flex';
         }
     }
 
-    /* 以下為原有計算邏輯 (完全不變動) */
+    /* 計算邏輯區域 */
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

@@ -110,9 +110,9 @@
         
         button.calc-btn { width: 100%; padding: 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         
-        /* 匯出按鈕樣式 */
-        .export-btn { width: 100%; padding: 12px; background: #555; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; opacity: 0.9; transition: 0.3s; }
-        .export-btn:hover { background: #333; opacity: 1; }
+        /* 分享匯出按鈕樣式 */
+        .export-btn { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .export-btn:hover { background: #000; }
 
         .result-area { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: rgba(238, 242, 247, 0.95); border: 1px solid #cbd5e0; }
         .res-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; }
@@ -130,12 +130,10 @@
             backdrop-filter: blur(10px);
         }
         .agent-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .agent-info b { font-size: 17px; color: var(--primary); }
         .btn-contact { display: inline-block; margin-top: 10px; background: #00b900; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: 0.3s; font-weight: bold; }
         
         .note { font-size: 12px; color: #666; margin-top: 15px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 10px; }
-
-        /* 針對匯出時的微調 */
-        .html2canvas-container { width: 800px !important; height: auto !important; }
     </style>
 </head>
 <body>
@@ -236,70 +234,86 @@
         </div>
     </div>
 
-    <button class="export-btn" onclick="exportAsImage()">📸 匯出計算結果圖檔</button>
+    <button class="export-btn" id="shareBtn" onclick="exportAndShare()">📸 分享或儲存計算結果</button>
 
     <div class="agent-banner">
         <img src="https://i.ibb.co/yBmSR26p/IMG-1225.jpg" class="agent-img" alt="專家頭像">
         <div class="agent-info">
             <b>陳佑浚 (柚子) | 房產財務規劃專家</b><br>
-            <small>17年實務經驗，精準掌握房地合一稅務配置</small><br>
-            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 傳合約給我幫您精算</a>
+            <small>17年實務經驗 · 誠信精算服務</small><br>
+            <a href="https://line.me/ti/p/lazyzal" class="btn-contact">💬 傳合約幫您精算</a>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-
 <script>
-    /* 匯出功能邏輯 */
-    function exportAsImage() {
-        const element = document.getElementById('captureArea');
-        const btn = document.querySelector('.export-btn');
+    /* 1. 解決顏色淺 & 2. 分享到相簿功能 */
+    async function exportAndShare() {
+        const area = document.getElementById('captureArea');
+        const btn = document.getElementById('shareBtn');
         
-        // 匯出時暫時隱藏匯出按鈕本身，避免出現在圖中
+        // 暫時隱藏按鈕避免入鏡
         btn.style.display = 'none';
 
-        html2canvas(element, {
-            useCORS: true, // 允許跨域圖片 (如頭像)
-            backgroundColor: "#f4f7f6", // 背景色
-            scale: 2, // 提高解析度 (2倍)
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = '房產稅費計算結果_' + new Date().getTime() + '.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-            // 恢復匯出按鈕顯示
-            btn.style.display = 'block';
-        }).catch(err => {
-            alert("匯出失敗，請手動截圖。");
-            btn.style.display = 'block';
-        });
+        try {
+            const canvas = await html2canvas(area, {
+                useCORS: true,
+                scale: 3, // 高解析度
+                backgroundColor: "#f4f7f6",
+                onclone: (clonedDoc) => {
+                    // 【解決顏色太淺關鍵】：強制刷黑分身的文字
+                    const cloneWrap = clonedDoc.getElementById('captureArea');
+                    const results = clonedDoc.querySelectorAll('.result-area');
+                    const highlights = clonedDoc.querySelectorAll('.res-highlight, .highlight');
+                    
+                    cloneWrap.style.background = "#f4f7f6";
+                    clonedDoc.querySelectorAll('h1, h2, h3, label, span, b, div').forEach(el => {
+                        el.style.color = "#000000"; // 文字全黑
+                        el.style.opacity = "1";
+                    });
+                    results.forEach(res => {
+                        res.style.background = "#ffffff"; // 結果區改純白背景
+                        res.style.border = "1px solid #333";
+                        res.style.display = "block";
+                    });
+                    highlights.forEach(h => h.style.color = "#d35400"); // 保持橘色重點
+                }
+            });
+
+            btn.style.display = 'flex'; // 恢復按鈕
+
+            // 轉成 Blob 準備分享
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `試算結果_${new Date().getTime()}.png`, { type: "image/png" });
+
+                // 檢查是否支援原生分享 (Web Share API)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: '房產稅費試算結果',
+                            text: '由陳佑浚專家監製之精算結果'
+                        });
+                    } catch (err) {
+                        // 使用者取消分享不執行
+                    }
+                } else {
+                    // 不支援分享則自動下載
+                    const link = document.createElement('a');
+                    link.download = '試算結果.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    alert("瀏覽器不支援直接分享，已為您下載圖檔。");
+                }
+            }, 'image/png');
+
+        } catch (err) {
+            alert("產生圖片失敗，請手動截圖。");
+            btn.style.display = 'flex';
+        }
     }
 
-    /* 原有邏輯 */
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => {});
-        });
-    }
-
-    try {
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#2c3e50" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.2 },
-                "size": { "value": 3 },
-                "line_linked": { "enable": true, "distance": 150, "color": "#2c3e50", "opacity": 0.2, "width": 1 },
-                "move": { "enable": true, "speed": 1.2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
-            },
-            "interactivity": { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" }, resize: true } },
-            "retina_detect": true
-        });
-    } catch (e) {}
-
+    /* 原有計算邏輯 */
     function switchTab(evt, tabId) {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -343,21 +357,19 @@
         const rate = getRate(years);
         const fixedCost = buy + buyOther + reno;
         let sell = buy + targetProfit + (targetProfit * 0.4); 
-        let tax = 0; let agencyFee = 0;
         for (let i = 0; i < 100; i++) {
-            agencyFee = sell * agRate;
-            let autoSellFee = Math.min(sell * 0.03, 30);
-            let finalSellFee = Math.max(agencyFee, autoSellFee);
+            let agencyFee = sell * agRate;
+            let finalSellFee = Math.max(agencyFee, Math.min(sell * 0.03, 30));
             let taxBase = sell - fixedCost - finalSellFee - land;
-            tax = taxBase > 0 ? taxBase * rate : 0;
+            let tax = taxBase > 0 ? taxBase * rate : 0;
             let currentProfit = sell - fixedCost - finalSellFee - tax;
             let diff = targetProfit - currentProfit;
             if (Math.abs(diff) < 0.01) break;
             sell += diff; 
         }
         document.getElementById('res2-sell').innerText = Math.round(sell).toLocaleString();
-        document.getElementById('res2-tax').innerText = tax.toFixed(1);
-        document.getElementById('res2-agency').innerText = (sell * agRate).toFixed(1);
+        document.getElementById('res2-tax').innerText = ((Math.round(sell) - fixedCost - (Math.round(sell)*agRate))*rate).toFixed(1);
+        document.getElementById('res2-agency').innerText = (Math.round(sell) * agRate).toFixed(1);
         document.getElementById('res2-fixed').innerText = fixedCost.toFixed(1);
         document.getElementById('res2-final').innerText = targetProfit.toLocaleString();
         document.getElementById('res2').style.display = 'block';
@@ -369,8 +381,7 @@
     }
 
     function calcRental() {
-        const val = parseFloat(document.getElementById('rentInput').value);
-        if (isNaN(val) || val <= 0) { alert("請輸入有效的租金金額。"); return; }
+        const val = parseFloat(document.getElementById('rentInput').value) || 0;
         const mode = document.getElementById('rentMode').value;
         const tenant = document.getElementById('tenantType').value;
         const landlord = document.getElementById('landlordType').value;
@@ -389,13 +400,19 @@
         let taxableIncome = Math.max(0, (grossRent - monthlyExemption)) * (1 - deductionRate) * 12;
         document.getElementById('rentResultContent').innerHTML = `
             <div class="res-line"><span>合約應簽金額 (總額)：</span><b>${grossRent.toLocaleString()} 元</b></div>
-            <div class="res-line"><span>每月預扣稅款 (10%)：</span><span>${withholding.toLocaleString()} 元</span></div>
-            <div class="res-line"><span>每月二代健保 (2.11%)：</span><span>${nhi.toLocaleString()} 元</span></div>
+            <div class="res-line"><span>預扣 10% / 健保 2.11%：</span><span>${(withholding+nhi).toLocaleString()} 元</span></div>
             <div class="res-highlight">房東每月實拿：${netCash.toLocaleString()} 元</div>
-            <div class="res-line" style="border-top: 1px solid #ddd; margin-top:10px; padding-top:10px;"><span>年度綜所稅參考所得額：</span><span class="highlight">${Math.round(taxableIncome).toLocaleString()} 元</span></div>
+            <div class="res-line" style="border-top:1px solid #ddd; margin-top:10px; padding-top:10px;"><span>年度租賃所得額：</span><b>${Math.round(taxableIncome).toLocaleString()} 元</b></div>
         `;
         document.getElementById('res3').style.display = 'block';
     }
+</script>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    try {
+        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#2c3e50" }, "opacity": { "value": 0.15 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#2c3e50", "opacity": 0.1 }, "move": { "enable": true, "speed": 1 } } });
+    } catch (e) {}
 </script>
 
 </body>
